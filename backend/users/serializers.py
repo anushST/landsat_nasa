@@ -115,7 +115,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
 
         token = RegisterSerializer.create_confirmation_token(user)
-        confirm_url = (f'http://{settings.HOST_NAME}:8000/'
+        confirm_url = (f'http://{settings.HOST_NAME}/api/v1/'
                        f'auth/verify-email/{str(token)}/')
 
         send_mail(
