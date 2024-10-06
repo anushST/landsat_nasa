@@ -7,6 +7,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from rest_framework import serializers
+from rest_framework.validators import ValidationError
 
 from .exceptions import (
     EmailConfirmationTokenExpiredError, EmailConfirmationTokenInvalidError)
@@ -57,7 +58,7 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(required=True)
 
 
-class RegisterSerializer(serializers.ModelSerializer):
+class RegisterSerializer(serializers.Serializer):
     """Serializer for handling user registration.
 
     **Fields**:
@@ -68,14 +69,21 @@ class RegisterSerializer(serializers.ModelSerializer):
     - `password`: User's password. Required, not returned in responses.
     """
 
-    class Meta:
-        """Meta-data of the RegisterSerializer class."""
+    first_name = serializers.CharField(max_length=50, required=False)
+    last_name = serializers.CharField(max_length=50, required=False)
+    email = serializers.EmailField()
+    username = serializers.SlugField()
+    password = serializers.CharField(max_length=50)
+    
+    def validate(self, data):
+        users = User.objects.filter(email=data['email'])
+        if not users:
+            raise ValidationError('User with this email already exists.')
+        users = User.objects.filter(username=data['username'])
+        if not users:
+            raise ValidationError('User with this username already exists.')
+        return data
 
-        model = User
-        fields = ('first_name', 'last_name', 'email', 'username', 'password',)
-        extra_kwargs = {
-            'password': {'write_only': True}
-        }
 
     @staticmethod
     def create_confirmation_token(user):
