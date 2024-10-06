@@ -26,7 +26,6 @@ from .models import SatelliteAcqusition
     tags=['Reminders']
 )
 @api_view(['GET'])
-@permission_classes([permissions.IsAuthenticated])
 def acqusition_remind_view(request):
     """
     Напоминание пользователю за несколько минут до начала съемки.
@@ -100,7 +99,6 @@ def acqusition_remind_view(request):
     tags=['Reminders']
 )
 @api_view(['GET'])
-@permission_classes([permissions.IsAuthenticated])
 def plan_remind_view(request):
     satellites = request.GET.get('satellites')
     areas = request.GET.get('areas') # 'PATH|ROW,PATH|ROW'

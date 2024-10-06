@@ -11,26 +11,6 @@ services:
     ports:
       - 2349:5432
 
-  # nginx:
-  #   # образ, из которого должен быть запущен контейнер
-  #   image: nginx:1.21.3-alpine
-
-  #   ports:
-  #     - "80:80"
-
-  #   volumes:
-  #     - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-
-  #     - static_value:/var/html/static/
-
-  #     - media_value:/var/html/media/
-
-  #   depends_on:
-  #     - backend
-  #     - redis
-  #     - db
-  #     - celery
-
   backend:
     container_name: backend
     build:
