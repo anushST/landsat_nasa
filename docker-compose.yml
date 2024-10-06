@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7.0.11-alpine
+
+  db:
+    image: postgres:13.0-alpine
+    volumes:
+      - /var/lib/postgresql/data/
+    env_file:
+      - .env
+    ports:
+      - 2349:5432
+
+  # nginx:
+  #   # образ, из которого должен быть запущен контейнер
+  #   image: nginx:1.21.3-alpine
+
+  #   ports:
+  #     - "80:80"
+
+  #   volumes:
+  #     - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+
+  #     - static_value:/var/html/static/
+
+  #     - media_value:/var/html/media/
+
+  #   depends_on:
+  #     - backend
+  #     - redis
+  #     - db
+  #     - celery
+
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+    command: python manage.py runserver 0:8000
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/usr/src/app
+      - static_value:/usr/src/app/static/
+      - media_value:/usr/src/app/media/
+    ports:
+      - 8001:8000
+    depends_on:
+      - redis
+      - db
+
+  arequests:
+    container_name: arequests
+    build:
+      context: ./backend
+    command: python api/aws2.py
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/usr/src/app
+    depends_on:
+      - redis
+      - db
+
+  celery:
+    container_name: celery
+    build:
+      context: ./backend
+    command: celery --app=backend worker -l INFO --logfile=logs/celery.log
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/usr/src/app
+    depends_on:
+      - redis
+      - backend
+      - db
+
+volumes:
+  static_value:
+  media_value:
